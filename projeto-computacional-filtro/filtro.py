@@ -29,11 +29,21 @@ try:
     axs[1].set_ylabel('Magnitude')
 
     # Gerar resposta ao impulso ℎ[𝑛]
-    W = 1000  # Largura do pulso em Hz
+    W = 1200  # Largura do pulso em Hz
     T = 1 / W  # Período do pulso
+    
+    print(f'Largura do pulso: {W}')
+    print(f'Período do Pulso: {W}')
+    print(f'Tamanho do Signal: {len(signal)}')
+    print(f'number of channels: {signal.shape[0]}')
+    #print(f'Lengh Signal Audio: {signal.shape[0] / sample_rate}')
+    print(f'Sample Rate: {sample_rate}')
 
-    n = np.arange(0, 5 * sample_rate)  # Considerando apenas os primeiros 0.01 segundos
+    n = np.arange(0, 60 * sample_rate)  # Considerando apenas os primeiros 0.01 segundos
     h = np.sinc(2 * W * (n / sample_rate - T / 2))  # Pulso retangular usando sinc function
+
+    print(f'Tamanho n: {len(n)}')
+    print(f'Tamanho de h: {len(h)}')
 
     # Plotar o gráfico da resposta ao impulso ℎ[𝑛]
     axs[2].plot(h)
@@ -48,10 +58,10 @@ try:
     Y_conv = fft(y_conv)
 
     # Trim or zero-pad the h array to match the length of the signal array
-    h_trimmed = np.pad(h[:len(signal)], (0, len(signal) - len(h)), mode='constant')
+    #h_trimmed = np.pad(h[:len(signal)], (0, len(signal) - len(h)), mode='constant')
 
     # Calcular a resposta do filtro 𝑦[𝑛] usando o método da multiplicação na frequência
-    y_freq = signal * h_trimmed
+    y_freq = signal * h
     Y_freq = fft(y_freq)
 
     # Comparar os resultados
@@ -80,7 +90,12 @@ try:
     plt.show()
 
     # Ajustar a escala para valores inteiros de 16 bits (PCM)
-    y_ifft_int = np.int16(y_ifft_freq.real)
+    #y_ifft_int = np.int16(y_ifft_freq.real)
+    #y_ifft_scaled = y_ifft_freq.real / np.max(np.abs(y_ifft_freq.real))
+    y_ifft_int16 = np.int16(y_ifft_freq.real / np.max(np.abs(y_ifft_freq.real)) * 32767)
+
+    #y_ifft_int = np.int32(y_ifft_scaled * 2147483647)  # Scale to the range of 16-bit integers
+ 
 
     # Calcular a resposta do filtro 𝑦[𝑛] usando o método da convolução no tempo
     y_conv = convolve(signal, h, mode='same')
@@ -89,7 +104,7 @@ try:
     write('y_conv.wav', sample_rate, np.int16(y_conv.real))
 
     # Escrever o sinal processado em um arquivo .wav
-    write('y_filtered.wav', sample_rate, y_ifft_int)
+    write('y_filtered.wav', sample_rate, y_ifft_int16)
 
 except Exception as e:
     print(f"An error occurred: {e}")
