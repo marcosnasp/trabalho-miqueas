@@ -12,6 +12,12 @@ Crie o ambiente virtual (Virtual Environment):
 python -m venv venv
 ```
 
+Ative o virtual env, caso já tenha criado no passo anterior, caso esteja usando Powershell:
+
+```bash
+.\venv\Scripts\Activate.ps1
+```
+
 Instale os pacotes necessários para a execução do programa python:
 
 ```bash
