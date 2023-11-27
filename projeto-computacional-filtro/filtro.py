@@ -29,7 +29,7 @@ try:
     axs[1].set_ylabel('Magnitude')
 
     # Gerar resposta ao impulso ℎ[𝑛]
-    W = 1200  # Largura do pulso em Hz
+    W = 1800  # Largura do pulso em Hz
     T = 1 / W  # Período do pulso
     
     print(f'Largura do pulso: {W}')
@@ -40,7 +40,7 @@ try:
     print(f'Sample Rate: {sample_rate}')
 
     n = np.arange(0, 60 * sample_rate)  # Considerando apenas os primeiros 0.01 segundos
-    h = np.sinc(2 * W * (n / sample_rate - T / 2))  # Pulso retangular usando sinc function
+    h = np.sinc(2 * W * (n / sample_rate - T / 2))[:len(signal)]  # Pulso retangular usando sinc function
 
     print(f'Tamanho n: {len(n)}')
     print(f'Tamanho de h: {len(h)}')
@@ -90,21 +90,17 @@ try:
     plt.show()
 
     # Ajustar a escala para valores inteiros de 16 bits (PCM)
-    #y_ifft_int = np.int16(y_ifft_freq.real)
-    #y_ifft_scaled = y_ifft_freq.real / np.max(np.abs(y_ifft_freq.real))
-    y_ifft_int16 = np.int16(y_ifft_freq.real / np.max(np.abs(y_ifft_freq.real)) * 32767)
-
-    #y_ifft_int = np.int32(y_ifft_scaled * 2147483647)  # Scale to the range of 16-bit integers
+    y_norm = y_conv / W
+    y_norm_int16 = np.int16(y_norm.real / np.max(np.abs(y_norm.real)) * 32767)
  
-
     # Calcular a resposta do filtro 𝑦[𝑛] usando o método da convolução no tempo
     y_conv = convolve(signal, h, mode='same')
 
     # Escrever o sinal processado em um arquivo .wav
-    write('y_conv.wav', sample_rate, np.int16(y_conv.real))
+    write(f'y_conv_{W}.wav', sample_rate, np.int16(y_conv.real))
 
     # Escrever o sinal processado em um arquivo .wav
-    write('y_filtered.wav', sample_rate, y_ifft_int16)
+    write(f'y_filtered_{W}.wav', sample_rate, y_norm_int16)
 
 except Exception as e:
     print(f"An error occurred: {e}")
